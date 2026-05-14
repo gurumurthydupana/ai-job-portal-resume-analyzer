@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Post a Job — AI Job Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white p-4">
+                    <h3 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Post a New Job</h3>
+                    <small>Fill in the details below. Be specific about required skills for better candidate matching.</small>
+                </div>
+                <div class="card-body p-4">
+                    {% crispy form %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

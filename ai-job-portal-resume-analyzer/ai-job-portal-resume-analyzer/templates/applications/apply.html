@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Apply — {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-send me-2"></i>Apply for: {{ job.title }}</h4>
+                    <small>{{ job.company }} · {{ job.location }}</small>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Cover Letter <span class="text-muted">(optional)</span></label>
+                            <textarea name="cover_letter" class="form-control" rows="6"
+                                placeholder="Tell the recruiter why you're a great fit for this role..."></textarea>
+                        </div>
+
+                        {% if profile and profile.resume %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-file-earmark-pdf me-2"></i>
+                            Your resume will be submitted: <a href="{{ profile.resume.url }}" target="_blank">View Resume</a>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            You haven't uploaded a resume yet.
+                            <a href="/accounts/profile/edit/">Upload now</a> for a better match score.
+                        </div>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-send me-2"></i>Submit Application
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match Score Sidebar -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white fw-bold border-0">
+                    <i class="bi bi-graph-up text-primary me-2"></i>Resume Match Preview
+                </div>
+                <div class="card-body text-center">
+                    {% if resume_score is not None %}
+                        <div class="display-4 fw-bold
+                            {% if resume_score >= 75 %}text-success
+                            {% elif resume_score >= 50 %}text-warning
+                            {% else %}text-danger{% endif %}">
+                            {{ resume_score|floatformat:0 }}%
+                        </div>
+                        <p class="text-muted">Match Score</p>
+
+                        {% if matched_skills %}
+                        <div class="text-start mt-3">
+                            <p class="fw-semibold text-success"><i class="bi bi-check me-1"></i>You have:</p>
+                            {% for skill in matched_skills %}
+                                <span class="badge bg-success me-1 mb-1">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% if missing_skills %}
+                        <div class="text-start mt-3">
+                            <p class="fw-semibold text-danger"><i class="bi bi-x me-1"></i>Missing:</p>
+                            {% for skill in missing_skills %}
+                                <span class="badge bg-danger me-1 mb-1">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted">Upload your resume to see match score.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Job Summary -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="fw-bold">Job Requirements</h6>
+                    {% for skill in job.get_required_skills_list %}
+                        <span class="badge bg-light text-dark border me-1 mb-1">{{ skill }}</span>
+                    {% endfor %}
+                    <hr>
+                    <small class="text-muted">
+                        <i class="bi bi-currency-rupee me-1"></i>{{ job.get_salary_display }}<br>
+                        <i class="bi bi-clock me-1"></i>{{ job.get_employment_type_display }}<br>
+                        <i class="bi bi-bar-chart me-1"></i>{{ job.get_experience_level_display }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

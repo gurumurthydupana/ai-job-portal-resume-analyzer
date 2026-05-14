@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Applicants for {{ job.title }} — AI Job Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex align-items-center mb-4">
+        <a href="/accounts/dashboard/" class="btn btn-outline-secondary me-3">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="fw-bold mb-0">Applicants for: {{ job.title }}</h2>
+            <p class="text-muted mb-0">{{ job.company }} · {{ applications.count }} applicant{{ applications.count|pluralize }} · Sorted by match score</p>
+        </div>
+    </div>
+
+    {% if applications %}
+    <div class="row g-3">
+        {% for app in applications %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <!-- Applicant Info -->
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width:48px;height:48px;font-weight:700;font-size:1.2rem;">
+                                    {{ app.applicant.username|first|upper }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ app.applicant.username }}</div>
+                                    <div class="text-muted small">{{ app.applicant.email }}</div>
+                                    {% if app.applicant.profile.experience_years %}
+                                    <div class="text-muted small">
+                                        <i class="bi bi-briefcase me-1"></i>{{ app.applicant.profile.experience_years }} years exp.
+                                    </div>
+                                    {% endif %}
+                                    <div class="mt-1">
+                                        {% if app.applicant.profile.resume %}
+                                        <a href="{{ app.applicant.profile.resume.url }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2">
+                                            <i class="bi bi-file-pdf me-1"></i>Resume
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Match Score -->
+                        <div class="col-md-3 mt-3 mt-md-0">
+                            <div class="text-center">
+                                <div class="fw-semibold small text-muted mb-1">Match Score</div>
+                                <div class="display-6 fw-bold
+                                    {% if app.resume_score >= 75 %}text-success
+                                    {% elif app.resume_score >= 50 %}text-warning
+                                    {% else %}text-danger{% endif %}">
+                                    {{ app.resume_score|floatformat:0 }}%
+                                </div>
+                                <div class="progress mt-1" style="height:6px;">
+                                    <div class="progress-bar bg-{{ app.get_score_badge_class }}"
+                                         style="width:{{ app.resume_score }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skills Match -->
+                        <div class="col-md-3 mt-3 mt-md-0">
+                            {% if app.get_matched_skills_list %}
+                            <div class="small fw-semibold text-success mb-1">Has:</div>
+                            {% for skill in app.get_matched_skills_list|slice:":4" %}
+                                <span class="badge bg-success me-1 mb-1" style="font-size:.72rem;">{{ skill }}</span>
+                            {% endfor %}
+                            {% endif %}
+                            {% if app.get_missing_skills_list %}
+                            <div class="small fw-semibold text-danger mt-1 mb-1">Missing:</div>
+                            {% for skill in app.get_missing_skills_list|slice:":3" %}
+                                <span class="badge bg-danger me-1 mb-1" style="font-size:.72rem;">{{ skill }}</span>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Status Update -->
+                        <div class="col-md-2 mt-3 mt-md-0">
+                            <div class="mb-2">
+                                <span class="badge p-2 status-{{ app.status }} d-block text-center mb-2">
+                                    {{ app.get_status_display }}
+                                </span>
+                            </div>
+                            <form method="POST" action="/applications/{{ app.id }}/update-status/">
+                                {% csrf_token %}
+                                <select name="status" class="form-select form-select-sm mb-1">
+                                    {% for value, label in app.STATUS_CHOICES %}
+                                        <option value="{{ value }}" {% if app.status == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <input type="text" name="recruiter_notes" class="form-control form-control-sm mb-1"
+                                       placeholder="Add a note..." value="{{ app.recruiter_notes }}">
+                                <button type="submit" class="btn btn-sm btn-primary w-100">Update</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    {% if app.cover_letter %}
+                    <div class="mt-3 pt-3 border-top">
+                        <small class="fw-semibold text-muted">Cover Letter:</small>
+                        <p class="text-muted small mt-1 mb-0">{{ app.cover_letter|truncatechars:300 }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-people text-muted" style="font-size:4rem;"></i>
+        <h4 class="mt-3 text-muted">No applications yet</h4>
+        <p class="text-muted">Share your job listing to attract candidates.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

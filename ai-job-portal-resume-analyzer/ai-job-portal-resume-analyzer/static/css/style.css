@@ -1,0 +1,131 @@
+/* =====================================================
+   AI Job Portal — Custom Stylesheet
+   ===================================================== */
+
+/* ── Variables ── */
+:root {
+    --primary: #0d6efd;
+    --card-radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,.08);
+}
+
+/* ── Global ── */
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f8f9fa;
+    color: #212529;
+}
+
+/* ── Navbar ── */
+.navbar-brand {
+    letter-spacing: -0.5px;
+}
+
+/* ── Hero ── */
+.hero-section {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+}
+
+.hero-stat {
+    background: rgba(255,255,255,.15);
+    border-radius: var(--card-radius);
+    padding: 1.25rem;
+    backdrop-filter: blur(4px);
+}
+
+/* ── Cards ── */
+.card {
+    border-radius: var(--card-radius);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.job-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.12) !important;
+}
+
+/* ── Badges ── */
+.badge {
+    font-weight: 500;
+    letter-spacing: .3px;
+}
+
+/* ── Feature Icon ── */
+.feature-icon {
+    transition: transform .2s;
+}
+.feature-icon:hover {
+    transform: scale(1.1);
+}
+
+/* ── Score Circle ── */
+.score-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 8px solid;
+    margin: 0 auto;
+}
+.score-circle.score-high { border-color: #198754; background: #d1e7dd; color: #0f5132; }
+.score-circle.score-mid  { border-color: #ffc107; background: #fff3cd; color: #664d03; }
+.score-circle.score-low  { border-color: #dc3545; background: #f8d7da; color: #842029; }
+.score-number { font-size: 2.2rem; font-weight: 700; }
+
+/* ── Tables ── */
+.table th {
+    font-weight: 600;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: #6c757d;
+}
+
+/* ── Buttons ── */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+/* ── Forms ── */
+.form-control, .form-select {
+    border-radius: 8px;
+}
+
+/* ── Footer ── */
+footer {
+    margin-top: auto;
+}
+
+/* ── Skill Gap Chart ── */
+.skill-bar-container {
+    background: #e9ecef;
+    border-radius: 4px;
+    height: 10px;
+    overflow: hidden;
+}
+.skill-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width .6s ease;
+}
+
+/* ── Status Badges ── */
+.status-applied    { background: #cfe2ff; color: #084298; }
+.status-reviewed   { background: #fff3cd; color: #664d03; }
+.status-shortlisted{ background: #d1e7dd; color: #0f5132; }
+.status-interview  { background: #d0d3d4; color: #495057; }
+.status-rejected   { background: #f8d7da; color: #842029; }
+.status-hired      { background: #d1e7dd; color: #0a3622; font-weight: 700; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .hero-section { min-height: 300px; }
+    .score-circle { width: 100px; height: 100px; }
+    .score-number { font-size: 1.8rem; }
+}

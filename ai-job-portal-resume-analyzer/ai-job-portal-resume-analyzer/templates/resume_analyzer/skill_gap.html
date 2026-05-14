@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Skill Gap Analysis — AI Job Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="fw-bold mb-1"><i class="bi bi-bar-chart-line text-primary me-2"></i>Market Skill Gap Analysis</h2>
+    <p class="text-muted mb-4">See which skills are most in demand across all active jobs and how you compare.</p>
+
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-bold border-0">Top 20 In-Demand Skills</div>
+                <div class="card-body">
+                    {% for item in skill_data %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div class="d-flex align-items-center gap-2">
+                                {% if item.you_have_it %}
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                {% else %}
+                                    <i class="bi bi-x-circle text-danger"></i>
+                                {% endif %}
+                                <span class="fw-semibold">{{ item.skill }}</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                {% if item.you_have_it %}
+                                    <span class="badge bg-success">You have it</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Missing</span>
+                                {% endif %}
+                                <small class="text-muted">{{ item.demand_count }} job{{ item.demand_count|pluralize }}</small>
+                            </div>
+                        </div>
+                        <div class="skill-bar-container">
+                            <div class="skill-bar {% if item.you_have_it %}bg-success{% else %}bg-danger{% endif %}"
+                                 data-width="{{ item.demand_count }}0%" style="width:0%;">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Your Skills -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-white fw-bold border-0">Your Skills</div>
+                <div class="card-body">
+                    {% if profile and profile.get_skills_list %}
+                        {% for skill in profile.get_skills_list %}
+                            <span class="badge bg-primary me-1 mb-1">{{ skill }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted small">
+                            No skills listed. <a href="/accounts/profile/edit/">Add skills to your profile</a>.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Learning Suggestions -->
+            {% if suggestions %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-warning text-dark fw-bold border-0">
+                    <i class="bi bi-lightbulb me-2"></i>Top Skills to Learn
+                </div>
+                <div class="card-body p-0">
+                    {% for s in suggestions %}
+                    <div class="d-flex align-items-center p-3 border-bottom">
+                        <i class="bi bi-book text-warning me-2 fs-5"></i>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">{{ s.skill }}</div>
+                            <small class="text-muted">{{ s.category }}</small>
+                        </div>
+                        <a href="{{ s.resource_url }}" target="_blank" class="btn btn-sm btn-outline-primary">Learn</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

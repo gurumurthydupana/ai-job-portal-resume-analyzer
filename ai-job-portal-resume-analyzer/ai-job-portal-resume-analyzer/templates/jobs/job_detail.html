@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% block title %}{{ job.title }} — AI Job Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row g-4">
+
+        <!-- Main Job Info -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <!-- Header -->
+                    <div class="d-flex align-items-start gap-3 mb-4">
+                        <div class="company-logo bg-primary text-white rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:64px;height:64px;font-size:1.8rem;font-weight:700;">
+                            {{ job.company|first|upper }}
+                        </div>
+                        <div>
+                            <h2 class="fw-bold mb-1">{{ job.title }}</h2>
+                            <p class="text-muted mb-1">
+                                <i class="bi bi-building me-1"></i>{{ job.company }}
+                                <span class="mx-2">·</span>
+                                <i class="bi bi-geo-alt me-1"></i>{{ job.location }}
+                            </p>
+                            <div>
+                                <span class="badge bg-primary me-1">{{ job.get_employment_type_display }}</span>
+                                <span class="badge bg-secondary me-1">{{ job.get_experience_level_display }}</span>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Job Description -->
+                    <h5 class="fw-bold border-bottom pb-2 mb-3">Job Description</h5>
+                    <div class="job-description" style="line-height:1.8;">
+                        {{ job.description|linebreaks }}
+                    </div>
+
+                    <!-- Required Skills -->
+                    <h5 class="fw-bold border-bottom pb-2 mb-3 mt-4">Required Skills</h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for skill in job.get_required_skills_list %}
+                            <span class="badge bg-primary p-2 fs-6">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Recruiter Actions -->
+                    {% if user.is_authenticated and user == job.recruiter %}
+                    <div class="mt-4 pt-3 border-top d-flex gap-2">
+                        <a href="/jobs/{{ job.id }}/edit/" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-1"></i>Edit Job
+                        </a>
+                        <a href="/applications/job/{{ job.id }}/applicants/" class="btn btn-outline-success">
+                            <i class="bi bi-people me-1"></i>View Applicants
+                        </a>
+                        <a href="/jobs/{{ job.id }}/delete/" class="btn btn-outline-danger">
+                            <i class="bi bi-trash me-1"></i>Delete
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Apply Card -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-4 text-center">
+                    {% if user.is_authenticated %}
+                        {% if user.role == 'job_seeker' %}
+                            {% if already_applied %}
+                                <div class="alert alert-success mb-3">
+                                    <i class="bi bi-check-circle-fill me-2"></i>You have already applied!
+                                </div>
+                                <a href="/applications/my/" class="btn btn-outline-primary w-100">
+                                    View My Applications
+                                </a>
+                            {% else %}
+                                {% if match_score is not None %}
+                                <div class="mb-3">
+                                    <div class="fw-semibold text-muted mb-1">Your Match Score</div>
+                                    <div class="display-5 fw-bold
+                                        {% if match_score >= 75 %}text-success
+                                        {% elif match_score >= 50 %}text-warning
+                                        {% else %}text-danger{% endif %}">
+                                        {{ match_score|floatformat:0 }}%
+                                    </div>
+                                    <div class="progress mt-2" style="height:8px;">
+                                        <div class="progress-bar
+                                            {% if match_score >= 75 %}bg-success
+                                            {% elif match_score >= 50 %}bg-warning
+                                            {% else %}bg-danger{% endif %}"
+                                            style="width:{{ match_score }}%"></div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                <a href="/applications/apply/{{ job.id }}/" class="btn btn-primary btn-lg w-100 mb-2">
+                                    <i class="bi bi-send me-2"></i>Apply Now
+                                </a>
+                                <a href="/resume/analyze/{{ job.id }}/" class="btn btn-outline-warning w-100">
+                                    <i class="bi bi-graph-up me-1"></i>Full Resume Analysis
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-muted">Log in as a job seeker to apply.</p>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted mb-3">Login to apply for this job.</p>
+                        <a href="/accounts/login/?next=/jobs/{{ job.id }}/" class="btn btn-primary w-100 mb-2">Login to Apply</a>
+                        <a href="/accounts/register/" class="btn btn-outline-secondary w-100">Create Account</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Job Details Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-bold border-0">Job Overview</div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="d-flex align-items-center mb-3">
+                            <i class="bi bi-currency-rupee text-primary me-2 fs-5"></i>
+                            <div>
+                                <small class="text-muted d-block">Salary</small>
+                                <span class="fw-semibold">{{ job.get_salary_display }}</span>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center mb-3">
+                            <i class="bi bi-briefcase text-primary me-2 fs-5"></i>
+                            <div>
+                                <small class="text-muted d-block">Employment Type</small>
+                                <span class="fw-semibold">{{ job.get_employment_type_display }}</span>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center mb-3">
+                            <i class="bi bi-bar-chart text-primary me-2 fs-5"></i>
+                            <div>
+                                <small class="text-muted d-block">Experience Level</small>
+                                <span class="fw-semibold">{{ job.get_experience_level_display }}</span>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center mb-3">
+                            <i class="bi bi-calendar text-primary me-2 fs-5"></i>
+                            <div>
+                                <small class="text-muted d-block">Posted</small>
+                                <span class="fw-semibold">{{ job.created_at|date:"M d, Y" }}</span>
+                            </div>
+                        </li>
+                        {% if job.deadline %}
+                        <li class="d-flex align-items-center">
+                            <i class="bi bi-alarm text-danger me-2 fs-5"></i>
+                            <div>
+                                <small class="text-muted d-block">Application Deadline</small>
+                                <span class="fw-semibold text-danger">{{ job.deadline|date:"M d, Y" }}</span>
+                            </div>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

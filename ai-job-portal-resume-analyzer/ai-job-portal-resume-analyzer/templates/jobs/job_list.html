@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Browse Jobs — AI Job Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Browse Jobs</h2>
+            <p class="text-muted mb-0">{{ total_jobs }} job{{ total_jobs|pluralize }} found</p>
+        </div>
+        {% if user.is_authenticated and user.role == 'recruiter' %}
+            <a href="/jobs/post/" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i>Post a Job
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Search & Filter Form -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small">Keyword</label>
+                        {{ form.keyword }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold small">Location</label>
+                        {{ form.location }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold small">Type</label>
+                        {{ form.employment_type }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold small">Level</label>
+                        {{ form.experience_level }}
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+                {% if request.GET %}
+                    <div class="mt-2">
+                        <a href="/jobs/list/" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-x me-1"></i>Clear Filters
+                        </a>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Job Cards -->
+    <div class="row g-3">
+        {% for job in jobs %}
+        <div class="col-12">
+            <div class="card job-card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-7">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="company-logo bg-primary text-white rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width:48px;height:48px;font-size:1.2rem;font-weight:700;">
+                                    {{ job.company|first|upper }}
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1">
+                                        <a href="/jobs/{{ job.id }}/" class="text-decoration-none text-dark">{{ job.title }}</a>
+                                    </h5>
+                                    <p class="text-muted mb-1">
+                                        <i class="bi bi-building me-1"></i>{{ job.company }}
+                                        <span class="mx-2">·</span>
+                                        <i class="bi bi-geo-alt me-1"></i>{{ job.location }}
+                                    </p>
+                                    <div class="d-flex flex-wrap gap-1 mt-2">
+                                        {% for skill in job.get_required_skills_list|slice:":5" %}
+                                            <span class="badge bg-light text-dark border">{{ skill }}</span>
+                                        {% endfor %}
+                                        {% if job.get_required_skills_list|length > 5 %}
+                                            <span class="badge bg-light text-muted border">+{{ job.get_required_skills_list|length|add:"-5" }} more</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 text-md-center mt-3 mt-md-0">
+                            <div class="mb-1">
+                                <span class="badge bg-primary">{{ job.get_employment_type_display }}</span>
+                                <span class="badge bg-secondary ms-1">{{ job.get_experience_level_display }}</span>
+                            </div>
+                            <div class="text-muted small">
+                                <i class="bi bi-currency-rupee"></i>{{ job.get_salary_display }}
+                            </div>
+                            <div class="text-muted small">
+                                <i class="bi bi-clock me-1"></i>{{ job.created_at|timesince }} ago
+                            </div>
+                        </div>
+
+                        <div class="col-md-2 text-md-end mt-3 mt-md-0">
+                            {% if job.id in applied_job_ids %}
+                                <span class="btn btn-sm btn-success disabled w-100 mb-1">
+                                    <i class="bi bi-check-circle me-1"></i>Applied
+                                </span>
+                            {% elif user.is_authenticated and user.role == 'job_seeker' %}
+                                <a href="/applications/apply/{{ job.id }}/" class="btn btn-sm btn-primary w-100 mb-1">
+                                    Apply Now
+                                </a>
+                            {% endif %}
+                            <a href="/jobs/{{ job.id }}/" class="btn btn-sm btn-outline-secondary w-100">View Details</a>
+                            <a href="/resume/analyze/{{ job.id }}/" class="btn btn-sm btn-outline-warning w-100 mt-1">
+                                <i class="bi bi-graph-up me-1"></i>Check Match
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-search text-muted" style="font-size:3rem;"></i>
+            <h5 class="mt-3 text-muted">No jobs found matching your criteria.</h5>
+            <a href="/jobs/list/" class="btn btn-outline-primary mt-2">Clear Filters</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

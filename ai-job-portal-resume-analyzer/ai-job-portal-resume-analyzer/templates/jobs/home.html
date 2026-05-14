@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% block title %}AI Job Portal — Find Your Dream Job{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container text-center py-4">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="bi bi-robot me-2"></i>AI-Powered Job Matching
+        </h1>
+        <p class="lead mb-4">Upload your resume. We analyze your skills. Get matched to the right jobs.</p>
+
+        <!-- Search Bar -->
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <form method="GET" action="/jobs/list/" class="d-flex gap-2">
+                    <input type="text" name="keyword" class="form-control form-control-lg"
+                           placeholder="Job title, skill, or company...">
+                    <button type="submit" class="btn btn-warning btn-lg px-4 fw-bold">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="row justify-content-center mt-5 g-4">
+            <div class="col-md-3">
+                <div class="hero-stat">
+                    <h3 class="fw-bold">500+</h3>
+                    <p class="mb-0">Active Jobs</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="hero-stat">
+                    <h3 class="fw-bold">1000+</h3>
+                    <p class="mb-0">Companies</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="hero-stat">
+                    <h3 class="fw-bold">AI</h3>
+                    <p class="mb-0">Skill Matching</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-5">How It Works</h2>
+        <div class="row g-4 text-center">
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm p-3">
+                    <div class="card-body">
+                        <div class="feature-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:60px;height:60px;">
+                            <i class="bi bi-person-plus fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">1. Create Profile</h5>
+                        <p class="text-muted">Register as a job seeker or recruiter and complete your profile.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm p-3">
+                    <div class="card-body">
+                        <div class="feature-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:60px;height:60px;">
+                            <i class="bi bi-file-earmark-arrow-up fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">2. Upload Resume</h5>
+                        <p class="text-muted">Upload your PDF resume. Our AI extracts your skills automatically.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm p-3">
+                    <div class="card-body">
+                        <div class="feature-icon bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:60px;height:60px;">
+                            <i class="bi bi-graph-up fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">3. Analyze Skills</h5>
+                        <p class="text-muted">Get a compatibility score and see which skills you're missing.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm p-3">
+                    <div class="card-body">
+                        <div class="feature-icon bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:60px;height:60px;">
+                            <i class="bi bi-send-check fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">4. Apply</h5>
+                        <p class="text-muted">Apply to matching jobs and track your application status.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Jobs -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Latest Jobs</h2>
+            <a href="/jobs/list/" class="btn btn-outline-primary">View All Jobs</a>
+        </div>
+        <div class="row g-4">
+            {% for job in featured_jobs %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card job-card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold mb-0">{{ job.title }}</h5>
+                            <span class="badge bg-primary">{{ job.get_employment_type_display }}</span>
+                        </div>
+                        <p class="text-muted mb-1"><i class="bi bi-building me-1"></i>{{ job.company }}</p>
+                        <p class="text-muted mb-2"><i class="bi bi-geo-alt me-1"></i>{{ job.location }}</p>
+                        <p class="text-muted small">{{ job.description|truncatechars:100 }}</p>
+                        <div class="mb-3">
+                            {% for skill in job.get_required_skills_list|slice:":4" %}
+                                <span class="badge bg-light text-dark border me-1">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">{{ job.created_at|timesince }} ago</small>
+                            <a href="/jobs/{{ job.id }}/" class="btn btn-sm btn-primary">View Job</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center text-muted">No jobs posted yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

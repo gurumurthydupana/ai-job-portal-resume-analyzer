@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% block title %}Resume Analyzer — AI Job Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h2 class="fw-bold"><i class="bi bi-graph-up-arrow text-primary me-2"></i>Resume Analyzer</h2>
+            <p class="text-muted">Select a job to see how well your resume matches, and discover missing skills.</p>
+        </div>
+
+        <!-- Job Selection -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-briefcase me-2"></i>Select a Job</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush" style="max-height:400px; overflow-y:auto;">
+                        {% for j in jobs_list %}
+                        <a href="/resume/analyze/{{ j.id }}/"
+                           class="list-group-item list-group-item-action {% if job and job.id == j.id %}active{% endif %}">
+                            <div class="fw-semibold">{{ j.title }}</div>
+                            <small class="text-muted {% if job and job.id == j.id %}text-white-50{% endif %}">{{ j.company }}</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="/resume/skill-gap/" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="bi bi-bar-chart me-1"></i>Market Skill Gap Analysis
+                    </a>
+                </div>
+            </div>
+
+            <!-- Resume Status -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="fw-bold">Your Resume</h6>
+                    {% if profile and profile.resume %}
+                        <p class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Resume uploaded</p>
+                        <a href="{{ profile.resume.url }}" target="_blank" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-download me-1"></i>View Resume
+                        </a>
+                    {% else %}
+                        <p class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i>No resume uploaded</p>
+                        <a href="/accounts/profile/edit/" class="btn btn-sm btn-warning">Upload Resume</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Results -->
+        <div class="col-md-8">
+            {% if job and analysis %}
+                <!-- Match Score -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body text-center py-4">
+                        <h4 class="fw-bold text-muted mb-1">Match Score for</h4>
+                        <h3 class="fw-bold">{{ job.title }} at {{ job.company }}</h3>
+
+                        <!-- Score Circle -->
+                        <div class="score-circle mx-auto my-4
+                            {% if analysis.score >= 75 %}score-high
+                            {% elif analysis.score >= 50 %}score-mid
+                            {% else %}score-low{% endif %}">
+                            <span class="score-number">{{ analysis.score|floatformat:0 }}%</span>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="progress mb-3" style="height:12px;">
+                            <div class="progress-bar
+                                {% if analysis.score >= 75 %}bg-success
+                                {% elif analysis.score >= 50 %}bg-warning
+                                {% else %}bg-danger{% endif %}"
+                                role="progressbar"
+                                style="width: {{ analysis.score }}%"
+                                aria-valuenow="{{ analysis.score }}"
+                                aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+
+                        <p class="text-muted">
+                            {{ analysis.total_matched }} of {{ analysis.total_required }} required skills matched
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <!-- Matched Skills -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-success text-white">
+                                <i class="bi bi-check2-circle me-2"></i>Matched Skills ({{ analysis.matched_skills|length }})
+                            </div>
+                            <div class="card-body">
+                                {% for skill in analysis.matched_skills %}
+                                    <span class="badge bg-success me-1 mb-1 p-2">
+                                        <i class="bi bi-check me-1"></i>{{ skill }}
+                                    </span>
+                                {% empty %}
+                                    <p class="text-muted">No matching skills found.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Missing Skills -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-danger text-white">
+                                <i class="bi bi-x-circle me-2"></i>Missing Skills ({{ analysis.missing_skills|length }})
+                            </div>
+                            <div class="card-body">
+                                {% for skill in analysis.missing_skills %}
+                                    <span class="badge bg-danger me-1 mb-1 p-2">
+                                        <i class="bi bi-x me-1"></i>{{ skill }}
+                                    </span>
+                                {% empty %}
+                                    <p class="text-success"><i class="bi bi-trophy me-1"></i>You match all required skills!</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Learning Resources for Missing Skills -->
+                    {% if analysis.skill_suggestions %}
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-warning text-dark">
+                                <i class="bi bi-lightbulb me-2"></i>Recommended Learning Resources
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-2">
+                                {% for suggestion in analysis.skill_suggestions %}
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center border rounded p-2">
+                                        <i class="bi bi-book text-warning me-2 fs-5"></i>
+                                        <div>
+                                            <div class="fw-semibold">{{ suggestion.skill }}</div>
+                                            <small class="text-muted">{{ suggestion.category }}</small>
+                                        </div>
+                                        <a href="{{ suggestion.resource_url }}" target="_blank"
+                                           class="btn btn-sm btn-outline-primary ms-auto">Learn</a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- CTA -->
+                    <div class="col-12 text-center">
+                        <a href="/applications/apply/{{ job.id }}/" class="btn btn-primary btn-lg me-2">
+                            <i class="bi bi-send me-2"></i>Apply for This Job
+                        </a>
+                        <a href="/jobs/{{ job.id }}/" class="btn btn-outline-secondary btn-lg">
+                            View Job Details
+                        </a>
+                    </div>
+                </div>
+
+            {% else %}
+                <!-- Placeholder when no job selected -->
+                <div class="card border-0 shadow-sm h-100 d-flex align-items-center justify-content-center">
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-arrow-left-circle fs-1 mb-3"></i>
+                        <h5>Select a job from the list</h5>
+                        <p>Choose a job on the left to see your resume match score and skill gap analysis.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.score-circle {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 8px solid;
+}
+.score-circle.score-high { border-color: #198754; background: #d1e7dd; }
+.score-circle.score-mid  { border-color: #ffc107; background: #fff3cd; }
+.score-circle.score-low  { border-color: #dc3545; background: #f8d7da; }
+.score-number { font-size: 2.5rem; font-weight: 700; }
+</style>
+{% endblock %}
